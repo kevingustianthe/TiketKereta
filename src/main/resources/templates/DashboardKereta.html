@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+    <head>
+        <title>Tiket Kereta</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia&effect=fire">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia&effect=neon|outline|emboss|shadow-multiple|3d-float">
+        <!-- Bootstrap CSS -->
+        <link th:href="@{/styles/cssandjs/main.css}" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Courgette&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v6.0"></script>
+        <style>
+            body {
+                background-color: #594546;
+            }
+        </style>
+    </head>
+    <body onload="getSourceDest()">
+        <nav class="navbar navbar-expand-md navbar-dark">
+            <a class="navbar-brand mb-0 h1 fs-2" href="#"> Tiket Kereta </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto d-flex justify-content-around ">
+                    <li class="nav-item active p-2">
+                        <a class="nav-link" th:href="@{/}">Home <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                    <li class="nav-item p-2">
+                        <a class="nav-link" href="">About </a>
+                    </li>
+                    <li class="nav-item p-2">
+                        <a class="nav-link" href="">Contact Us </a>
+                    </li>
+                    <li id="trAction" class="nav-item dropdown p-2">
+                        <a th:if="${user.isAdmin}" class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Data Kereta</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" th:href="@{/addTrain}">Tambah Kereta</a>
+                            <a class="dropdown-item" data-toggle="modal" data-target="#TrainModal">Update Kereta</a>
+                            <a class="dropdown-item" data-toggle="modal" data-target="#DeleteTrainModal">Hapus Kereta</a>
+                        </div>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a id="logstat" class="nav-link text-white" th:text="${user.email}"></a>
+                    </li>
+                    <li>
+                        <a class="nav-link" th:unless="${user.logStatus}" data-toggle="modal" data-target="#signupModal" href="#">
+                            <span class="glyphicon glyphicon-user"></span> Sign Up </a>
+                    </li>
+                    <li>
+                        <a class="nav-link" th:unless="${user.logStatus}" data-toggle="modal" data-target="#myModal" href="#">
+                            <span class="glyphicon glyphicon-log-in"></span> Login </a>
+                    </li>
+                    <li>
+                        <a class="nav-link" th:if="${user.logStatus}" th:href="@{/logout}">
+                            <span class="glyphicon glyphicon-log-in"></span> LogOut </a>
+                    </li>
+                </ul>
+                <!-- <form class="form-inline my-2 my-lg-0" th:object="${user}" method="post"><p id ="logstat" class = "text-white" th:text="${user.email}"></p ><button th:if="${user.logStatus}" class="btn btn-outline-success my-2 my-sm-1 mx-2" type="submit"><a th:href="@{/logout}">Logout</a></button  ><button th:unless="${user.logStatus}" type="button" class="btn btn-outline-warning my-2 my-sm-0 mx-2 glyphicon glyphicon-user" ><a th:unless="${user.logStatus}" href="" class="glyphicon glyphicon-user" data-toggle="modal" data-target="#signupModal">sign up</a ></button><button  th:unless="${user.logStatus}" type="button" class="btn btn-outline-warning my-2 my-sm-0 glyphicon glyphicon-log-in" ><a href="" data-toggle="modal" data-target="#myModal">Login</a></button ></form> --->
+            </div>
+        </nav>
+        <section>
+            <section class="vh-100" style="background-color: #815A5B;">
+                <div class="container py-5 h-100">
+                    <div class="row d-flex justify-content-center align-items-center h-100">
+                        <div class="col ">
+                            <div class="card" style="border-radius: 1rem;">
+                                <div class="align-items-center">
+                                    <div class="card-body p-4 p-lg-5 text-black">
+                                        <form id="searchTrain">
+                                            <div class="d-flex align-items-center mb-3 pb-1">
+                                                <span class="h1 fw-bold mb-0">Jadwal Kereta</span>
+                                            </div>
+                                            <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;"> Isi form dibawah sesuai dengan tiket yang ingin anda cari! </h5>
+                                            <div class="form-outline mb-4">
+                                                <label class="form-label" for="source">Asal</label>
+                                                <select name="source" class="form-control input-lg" id="source" value="Select source "></select>
+                                            </div>
+                                            <div class="form-outline mb-4">
+                                                <label class="form-label" for="Dest">Tujuan</label>
+                                                <select name="destinations" class="form-control input-lg" id="dest" value="Select Destination "></select>
+                                            </div>
+                                            <div class="form-outline mb-4">
+                                                <label class="form-label" for="TravelDate">Tanggal Keberangkatan</label>
+                                                <input type="date" id="TravelDate" class="form-control form-control-lg" />
+                                            </div>
+                                            <div class="pt-1 mb-4">
+                                                <button class="btn btn-dark btn-lg btn-block" type="submit">CARI</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <div class="container ">
+                    <!--    For Login  -->
+                    <div class="container-fluid">
+                        <!-- Modal -->
+                        <div class="modal fade" id="myModal" role="dialog">
+                            <div class="modal-dialog modal-md">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header ">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container py-5 h-100">
+                                            <div class="row d-flex justify-content-center align-items-center h-100">
+                                                <div class="col col-xl-10">
+                                                    <form id="loginform" th:action="@{/login}" method="post" th:object="${user}">
+                                                        <div class="d-flex align-items-center mb-3 pb-1">
+                                                            <span class="h1 fw-bold mb-0">Login</span>
+                                                        </div>
+                                                        <div class="form-outline mb-4">
+                                                            <label class="form-label" for="form2Example17">Email Address</label>
+                                                            <input type="email" id="email" name="email" placeholder="Email" class="form-control form-control-lg" required />
+                                                        </div>
+                                                        <div class="form-outline mb-4">
+                                                            <label class="form-label" for="form2Example27">Password</label>
+                                                            <input type="password" id="password" name="password" placeholder="Password" class="form-control form-control-lg" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 to 15 characters" required />
+                                                        </div>
+                                                        <div class="pt-1 mb-4">
+                                                            <button class="btn btn-dark btn-lg btn-block" type="submit">Login</button>
+                                                        </div>
+                                                        <p class="mb-5 pb-lg-2" style="color: #393f81;">Tidak punya akun? <a href="#!" data-toggle="modal" data-target="#signupModal" style="color: #393f81;">Daftar sekarang</a>
+                                                        </p>
+                                                        <hr class="my-4">
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--      For sign up       -->
+                    <div class="container-fluid">
+                        <!-- Modal -->
+                        <div class="modal fade" id="signupModal" role="dialog">
+                            <div class="modal-dialog modal-md">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header ">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container py-5 h-100">
+                                            <div class="row d-flex justify-content-center align-items-center h-100">
+                                                <div class="col col-xl-10">
+                                                    <form id="regform">
+                                                        <div class="d-flex align-items-center mb-3 pb-1">
+                                                            <span class="h1 fw-bold mb-0">Sign Up</span>
+                                                        </div>
+                                                        <div class="form-outline mb-4">
+                                                            <label class="form-label" for="form2Example17">Email Address</label>
+                                                            <input type="email" id="Email" placeholder="Email" class="form-control form-control-lg" required />
+                                                        </div>
+                                                        <div class="form-outline mb-4">
+                                                            <label class="form-label" for="form2Example27">Password</label>
+                                                            <input type="password" id="passwd" placeholder="Password" class="form-control form-control-lg" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 to 15 characters" required />
+                                                        </div>
+                                                        <div class="form-outline mb-4">
+                                                            <label class="form-label" for="form2Example27">Re-type Password</label>
+                                                            <input type="password" id="cnfpasswd" placeholder="Re-type Password" class="form-control form-control-lg" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 to 15 characters" required />
+                                                        </div>
+                                                        <div class="pt-1 mb-4">
+                                                            <button class="btn btn-dark btn-lg btn-block" type="submit">Daftar Sekarang</button>
+                                                        </div>
+                                                        <p class="mb-5 pb-lg-2" style="color: #393f81;">Sudah punya akun? <a href="#!" data-toggle="modal" data-target="#myModal" style="color: #393f81;">Masuk sekarang</a>
+                                                        </p>
+                                                        <hr class="my-4">
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--    For Update Train Modal -->
+                    <div class="container-fluid">
+                        <!-- Modal -->
+                        <div class="modal fade" id="TrainModal" role="dialog">
+                            <div class="modal-dialog modal-md">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header ">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container py-5 h-100">
+                                            <div class="row d-flex justify-content-center align-items-center h-100">
+                                                <div class="col col-xl-10">
+                                                    <form id="updateTRform">
+                                                        <div class="d-flex align-items-center mb-3 pb-1">
+                                                            <span class="h1 fw-bold mb-0">Update Kereta</span>
+                                                        </div>
+                                                        <div class="form-outline mb-4">
+                                                            <label class="form-label" for="form2Example17">Masukkan Nomor Kereta</label>
+                                                            <input type="number" id="trNumber" name="trainNo" placeholder="Nomor Kereta" class="form-control form-control-lg" required />
+                                                        </div>
+                                                        <div class="pt-1 mb-4">
+                                                            <button class="btn btn-dark btn-lg btn-block" type="submit">Cari</button>
+                                                        </div>
+                                                        <hr class="my-4">
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--    For Delete Train Modal -->
+                    <div class="container-fluid">
+                        <!-- Modal -->
+                        <div class="modal fade" id="DeleteTrainModal" role="dialog">
+                            <div class="modal-dialog modal-md">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header ">
+                                        <button type="button" id="closeDel" class="close" data-dismiss="modal">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container py-5 h-100">
+                                            <div class="row d-flex justify-content-center align-items-center h-100">
+                                                <div class="col col-xl-10">
+                                                    <form id="deleteTRform">
+                                                        <div class="d-flex align-items-center mb-3 pb-1">
+                                                            <span class="h1 fw-bold mb-0">Hapus Data Kereta</span>
+                                                        </div>
+                                                        <div class="form-outline mb-4">
+                                                            <label class="form-label" for="form2Example17">Masukkan Nomor Kereta</label>
+                                                            <input type="number" id="DeltrNumber" name="trainNo" placeholder="Nomor Kereta" class="form-control form-control-lg" required />
+                                                        </div>
+                                                        <div class="pt-1 mb-4">
+                                                            <button class="btn btn-dark btn-lg btn-block" type="submit">Hapus Data</button>
+                                                        </div>
+                                                        <hr class="my-4">
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </section>
+            <script>
+                function getSourceDest() {
+                    var urlsource = "http://localhost:8085/train/getSource"
+                    var urldest = "http://localhost:8085/train/getDestinations"
+                    var urltrainNos = "http://localhost:8085/train/getAllTrainNo"
+                    let sourcelist = []
+                    let destlist = []
+                    let trainlist = []
+                    fetch(urlsource, {
+                        method: 'GET',
+                        headers: {
+                            "Content-Type": "application/json",
+                            'dataType': 'json'
+                        }
+                    }).then((response) => response.json()).then((data) => Checksrc(data))
+
+                    function Checksrc(data) {
+                        sourcelist = data
+                        Sources = document.getElementById('source');
+                        for (let j = 0; j < sourcelist.length; j++) {
+                            Sources.options[Sources.options.length] = new Option(sourcelist[j], sourcelist[j]);
+                        }
+                    }
+                    fetch(urldest, {
+                        method: 'GET',
+                        headers: {
+                            "Content-Type": "application/json",
+                            'dataType': 'json'
+                        }
+                    }).then((response) => response.json()).then((data) => CheckData(data))
+
+                    function CheckData(data) {
+                        destlist = data
+                        Destinations = document.getElementById('dest');
+                        for (let i = 0; i < destlist.length; i++) {
+                            Destinations.options[Destinations.options.length] = new Option(destlist[i], destlist[i]);
+                        }
+                    }
+                    fetch(urltrainNos, {
+                        method: 'GET',
+                        headers: {
+                            "Content-Type": "application/json",
+                            'dataType': 'json'
+                        }
+                    }).then((response) => response.json()).then((data) => Checktrains(data))
+
+                    function Checktrains(data) {
+                        trainlist = data
+                        Trainnos = document.getElementById('trNo');
+                        for (let j = 0; j < trainlist.length; j++) {
+                            Trainnos.options[Trainnos.options.length] = new Option(trainlist[j], trainlist[j]);
+                        }
+                    }
+                    var email = document.getElementById("logstat").innerText;
+                    localStorage.setItem("email", email)
+                }
+            </script>
+            <script>
+                console.log("Halaman DashboardKereta")
+                var email = document.getElementById("logstat").innerText;
+                if (email.length > 1) {
+                    localStorage.setItem("email", email)
+                }
+                logoutEmail = localStorage.getItem("email");
+                console.log(logoutEmail)
+
+                function logout() {
+                    logoutEmail = localStorage.getItem("email");
+                    console.log(logoutEmail)
+                    userdata = {}
+                    userdata["email"] = logoutEmail
+                    userdata["password"] = "1234221"
+                    console.log(userdata)
+                    var urllogout = "http://localhost:8085/logout"
+                    fetch(urllogout, {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/json",
+                            'dataType': 'json'
+                        },
+                        body: JSON.stringify(userdata)
+                    }).then((response) => response.json()).then((data) => Checklog(data))
+
+                    function Checklog(data) {
+                        console.log(data)
+                        if (data == 'OK') {
+                            console.log(logoutEmail)
+                        }
+                    }
+                }
+                document.getElementById('updateTRform').addEventListener('submit', function(e) {
+                    e.preventDefault()
+                    var trNo = document.getElementById("trNumber").value
+                    window.location.href = "http://localhost:8085/updateTrain/" + trNo
+                });
+                document.getElementById('deleteTRform').addEventListener('submit', function(e) {
+                    e.preventDefault()
+                    var trNo = document.getElementById("DeltrNumber").value
+                    var urldeltr = "http://localhost:8085/deleteTrain/" + trNo
+                    fetch(urldeltr, {
+                        method: 'GET',
+                        headers: {
+                            "Content-Type": "application/json",
+                            'dataType': 'json'
+                        }
+                    }).then((response) => response.json()).then((data) => Checklog(data))
+
+                    function Checklog(data) {
+                        console.log(data)
+                        if (data == 'OK') {
+                            alert("Data kereta berhasil dihapus")
+                            document.getElementById("closeDel").click()
+                            window.location.href = "http://localhost:8085"
+                        } else {
+                            alert("Gagal menghapus data kereta")
+                            window.location.href = "http://localhost:8085"
+                        }
+                    }
+                });
+            </script>
+            <script></script>
+            <!-- Optional JavaScript -->
+            <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+            <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+            <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>-->
+            <script type="text/javascript" th:src="@{/trainUtil.js}"></script>
+            <script th:src="@{util.js}"></script>
+    </body>
+</html>

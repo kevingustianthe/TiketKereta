@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Tiket Kereta</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia&effect=neon|outline|emboss|shadow-multiple">
+        <!-- Bootstrap CSS -->
+        <link href="https://fonts.googleapis.com/css2?family=Courgette&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v6.0"></script>
+        <style>
+            body {
+                background-color: #594546;
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-md navbar-dark">
+            <a class="navbar-brand mb-0 h1 fs-2" href=""> Tiket Kereta </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto d-flex justify-content-around">
+                    <li class="nav-item active p-2">
+                        <a class="nav-link" th:href="@{/}">Home <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                    <li class="nav-item p-2">
+                        <a class="nav-link" href="">About </a>
+                    </li>
+                    <li class="nav-item p-2">
+                        <a class="nav-link" href="">Contact Us </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <section class="vh-100" style="background-color: #815A5B;">
+            <div class="container-fluid">
+                <h2 class="text-center p-4 my-2 mb-0 h1 fs-2" style="color:white"> Kereta yang Tersedia </h2>
+                <table class="table table-light table-hover">
+                    <thead>
+                        <tr>
+                            <th>NOMOR KERETA</th>
+                            <th>NAMA KERETA</th>
+                            <th>HARGA</th>
+                        </tr>
+                    </thead>
+                    <tbody class="tbody-white">
+                        <tr id="abc" th:each="train: ${trains}">
+                            <td id="trno" th:text="${train.trainNo}"></td>
+                            <td id="trname" th:text="${train.trainName}"></td>
+                            <td id="tiktprice" th:text="${train.ticketPrice}"></td>
+                            <td>
+                                <button class="btn btn-dark" onclick="navigateBooking()">Book seat </b>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <script type="text/javascript">
+            function navigateBooking() {
+                var trainno = event.target.parentNode.parentNode.childNodes[1].innerText;
+                var ticktPrice = event.target.parentNode.parentNode.childNodes[5].innerText;
+                localStorage.setItem("ticktPrice", ticktPrice)
+                localStorage.setItem("trainNo", trainno)
+                console.log(ticktPrice)
+                var userlogstatus = window.localStorage.getItem("trainNo");
+                console.log(userlogstatus)
+                var trNo = window.localStorage.getItem("trainNo")
+                var emaillog = localStorage.getItem("email");
+                if (emaillog.length > 1) {
+                    window.location.href = "/train/bookTrain/" + trNo
+                } else {
+                    alert("Masuk dahulu sebelum memesan tiket")
+                    window.location.href = "http://localhost:8085"
+                }
+            }
+        </script>
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    </body>
+</html>

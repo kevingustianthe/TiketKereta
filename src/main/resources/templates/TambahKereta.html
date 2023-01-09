@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia&effect=neon|outline|emboss|shadow-multiple">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <title>Tambah Data Kereta</title>
+    </head>
+    <style></style>
+    <body>
+        <nav class="navbar navbar-expand-md navbar-dark" style="background-color: #594546;">
+            <a class="navbar-brand mb-0 h1 fs-2" href="" >Tiket Kereta</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active p-2">
+                        <a class="nav-link" th:href="@{/}">Home <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                    <li class="nav-item p-2">
+                        <a class="nav-link" href="">About </a>
+                    </li>
+                    <li class="nav-item p-2">
+                        <a class="nav-link" href="">Contact Us </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container">
+            <br />
+            <br />
+            <h1 align="center"> Tambah Data Kereta</h1>
+            <br />
+            <br />
+            <form id="tr">
+                <div class="form-group">
+                    <label for="id">Nomor Kereta:</label>
+                    <input type="number" class="form-control" name="trainNo" id="trNo">
+                </div>
+                <div class="form-group">
+                    <label for="text">Nama Kereta:</label>
+                    <input type="text" class="form-control" id="trName" name="trainName">
+                </div>
+                <div class="form-group">
+                    <label for="source">Asal Kereta:</label>
+                    <input type="text" class="form-control" id="trSource" name="source">
+                </div>
+                <div class="form-group">
+                    <label for="destination">Tujuan Kereta:</label>
+                    <input type="text" class="form-control" id="trDest" name="destination">
+                </div>
+                <div class="form-group">
+                    <label for="price">Harga Kereta:</label>
+                    <input type="text" class="form-control" id="TiktPrice" name="ticketprice">
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-default">Tambah</button>
+                </div>
+            </form>
+        </div>
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script>
+            document.getElementById('tr').addEventListener('submit', function(e) {
+                e.preventDefault()
+                Train = {}
+                Train["trainNo"] = document.getElementById("trNo").value
+                Train["trainName"] = document.getElementById("trName").value
+                Train["source"] = document.getElementById("trSource").value
+                Train["destination"] = document.getElementById("trDest").value
+                Train["ticketPrice"] = document.getElementById("TiktPrice").value
+                console.log(Train)
+                var url = "http://localhost:8085/addTrain"
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                        'dataType': 'json'
+                    },
+                    body: JSON.stringify(Train)
+                }).then((response) => response.json()).then((data) => Checklog(data))
+
+                function Checklog(data) {
+                    console.log(data)
+                    if (data == 'OK') {
+                        alert("Berhasil menambah data kereta");
+                    } else {
+                        alert("Gagal menambah data kereta karena nomor kereta sudah ada")
+                        window.location.href = "http://localhost:8085"
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
